@@ -23,8 +23,8 @@ export async function createNotes(req, res) {
 }
 export async function updateNotes(req, res) {
     try {
-        const { title, content } = req.body
-        const updatedNote = await Note.findByIdAndUpdate(req.params.id, { title, content }, { new: true })
+        const { title, content,tags } = req.body
+        const updatedNote = await Note.findByIdAndUpdate(req.params.id, { title, content, tags }, { new: true })
         if (!updatedNote) return res.status(404).json({ message: "Note not found" })
         res.status(200).json(updatedNote)
 
@@ -53,5 +53,24 @@ export async function getNoteById(req, res) {
     } catch (error) {
         console.error("Error in getNoteById controller", error);
         res.status(500).json({ message: "Internal server error" })
+    }
+}
+export async function searchNotes(req,res) {
+    try {
+        const searchTerm = req.query.query;
+        if(!searchTerm || searchTerm.trim() === ""){
+            return res.status(400).json({message:"Search term is required"});
+        }
+
+        const notes = await Note.find({
+            $or:[
+                {title:{$regex: searchTerm,$options:"i"}},
+                {content:{$regex: searchTerm,$options:"i"}}
+            ]
+        });
+        res.json(notes);
+    } catch (error) {
+        console.log("Error in searching the note",error);
+        res.status(500).json({message:"Server error"})
     }
 }

@@ -23,7 +23,7 @@ export async function createNotes(req, res) {
 }
 export async function updateNotes(req, res) {
     try {
-        const { title, content,tags } = req.body
+        const { title, content, tags } = req.body
         const updatedNote = await Note.findByIdAndUpdate(req.params.id, { title, content, tags }, { new: true })
         if (!updatedNote) return res.status(404).json({ message: "Note not found" })
         res.status(200).json(updatedNote)
@@ -55,22 +55,32 @@ export async function getNoteById(req, res) {
         res.status(500).json({ message: "Internal server error" })
     }
 }
-export async function searchNotes(req,res) {
+export async function searchNotes(req, res) {
     try {
         const searchTerm = req.query.query;
-        if(!searchTerm || searchTerm.trim() === ""){
-            return res.status(400).json({message:"Search term is required"});
+        if (!searchTerm || searchTerm.trim() === "") {
+            return res.status(400).json({ message: "Search term is required" });
         }
 
         const notes = await Note.find({
-            $or:[
-                {title:{$regex: searchTerm,$options:"i"}},
-                {content:{$regex: searchTerm,$options:"i"}}
+            $or: [
+                { title: { $regex: searchTerm, $options: "i" } },
+                { content: { $regex: searchTerm, $options: "i" } }
             ]
         });
         res.json(notes);
     } catch (error) {
-        console.log("Error in searching the note",error);
-        res.status(500).json({message:"Server error"})
+        console.log("Error in searching the note", error);
+        res.status(500).json({ message: "Server error" })
+    }
+}
+export async function filterByTag(req, res) {
+    try {
+        const { tag } = req.params;
+        const notes = await Note.find({ tags: tag });
+        res.json(notes);
+    } catch (error) {
+        console.log("Error fetching notes by tag:", error)
+        res.status(500).json({ message: "Server error" })
     }
 }

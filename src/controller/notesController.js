@@ -68,6 +68,8 @@ export async function searchNotes(req, res) {
                 { content: { $regex: searchTerm, $options: "i" } }
             ]
         });
+        console.log(notes);
+        
         res.json(notes);
     } catch (error) {
         console.log("Error in searching the note", error);

@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 import cors from "cors"
 import path from "path"
 import notesRoutes from "./routes/notesRoutes.js"
-import {connectDB} from "./config/db.js"
+import { connectDB } from "./config/db.js"
 import rateLimiter from "./middleware/rateLimiter.js"
 dotenv.config();
 
@@ -31,17 +31,17 @@ app.use(rateLimiter);
 //console.log(`Req method is ${req.method} & Req URL is ${req.url}`);
 //next();
 //})
-app.use("/api/notes",notesRoutes)
+app.use("/api/notes", notesRoutes)
 // if(process.env.NODE_ENV === "production"){
 //    app.use(express.static(path.join(__dirname,"../frontend/dist")))
 // app.get("*",(req,res)=>{
 //    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"))
 // })
 // }
-connectDB().then(()=>{
-app.listen(PORT, () => {
-console.log("Server started on PORT:",PORT)
-})
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log("Server started on PORT:", PORT)
+  })
 })
 //app.get("/api/notes", (req,res)=>{
 //res.status(200).send("you got 10 notes")

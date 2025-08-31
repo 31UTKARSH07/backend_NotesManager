@@ -13,7 +13,6 @@ const registerValidation = (data) => {
                 'string.max': 'Name cannot exceed 50 characters',
                 'any.required': 'Name is required'
             }),
-
         email: Joi.string()
             .email()
             .required()
@@ -23,7 +22,6 @@ const registerValidation = (data) => {
                 'string.email': 'Please enter a valid email address',
                 'any.required': 'Email is required'
             }),
-
         password: Joi.string()
             .min(8)
             .max(128)
@@ -44,9 +42,10 @@ const registerValidation = (data) => {
             })
     })
     return schema.validate(data, { abortEarly: false })
+    /**Setting abortEarly: false tells Joi to check all validation rules
+     *  and return all errors at once. This is useful
+     *  for displaying all validation errors to the user simultaneously. */
 };
-
-
 const LoginValidation = (data) => {
     //console.log(data)
     const schema = Joi.object({
@@ -59,7 +58,6 @@ const LoginValidation = (data) => {
                 'string.email': 'Please enter a valid email address',
                 'any.required': 'Email is required'
             }),
-
         password: Joi.string()
             .required()
             .messages({
@@ -71,10 +69,8 @@ const LoginValidation = (data) => {
                 'boolean.base': 'Remember me must be true or false'
             })
     });
-
     return schema.validate(data)
 }
-
 const forgotPasswordValidation = (data) => {
     const schema = Joi.object({
         email: Joi.string()
@@ -89,7 +85,6 @@ const forgotPasswordValidation = (data) => {
     })
     return schema.validate(data);
 };
-
 const resetPasswordValidation = (data) => {
     const schema = Joi.object({
         token: Joi.string()
@@ -97,7 +92,6 @@ const resetPasswordValidation = (data) => {
             .messages({
                 'any.required': 'Reset token is required'
             }),
-
         password: Joi.string()
             .min(8)
             .max(128)
@@ -109,7 +103,6 @@ const resetPasswordValidation = (data) => {
                 'string.pattern.base': 'Password must contain at least one letter and one number',
                 'any.required': 'Password is required'
             }),
-
         confirmPassword: Joi.string()
             .valid(Joi.ref('password'))
             .required()
@@ -120,8 +113,6 @@ const resetPasswordValidation = (data) => {
     })
     return schema.validate(data, { abortEarly: false });
 }
-
-
 const formatValidationErrors = (errors) => {
     return errors.details.map(error => ({
         field: error.path[0],

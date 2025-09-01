@@ -2,7 +2,9 @@ import express from "express";
 import dotenv from "dotenv"
 import cors from "cors"
 import path from "path"
+import cookieParser from "cookie-parser";
 import notesRoutes from "./routes/notesRoutes.js"
+import authRoutes from "./routes/authRoutes.js"
 import { connectDB } from "./config/db.js"
 import rateLimiter from "./middleware/rateLimiter.js"
 dotenv.config();
@@ -25,12 +27,14 @@ app.use(cors({
 // }
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(rateLimiter);
 //our simple custom middleware
 //app.use((req,res,next)=>{
 //console.log(`Req method is ${req.method} & Req URL is ${req.url}`);
 //next();
 //})
+app.use("/api/auth",authRoutes)
 app.use("/api/notes", notesRoutes)
 // if(process.env.NODE_ENV === "production"){
 //    app.use(express.static(path.join(__dirname,"../frontend/dist")))

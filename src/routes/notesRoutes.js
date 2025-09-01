@@ -1,10 +1,18 @@
 import express from "express"
-import { createNotes, getAllNotes, updateNotes, deleteNotes, getNoteById, searchNotes,filterByTag } from "../controller/notesController.js"
+import {
+    createNotes,
+    getAllNotes,
+    updateNotes,
+    deleteNotes,
+    getNoteById,
+    searchNotes,
+    filterByTag
+} from "../controller/notesController.js"
 const router = express.Router();
 
 router.get("/", getAllNotes);
 router.get("/search", searchNotes);
-router.get("/tag/:tag",filterByTag);
+router.get("/tag/:tag", filterByTag);
 router.get("/:id", getNoteById);
 router.post("/", createNotes);
 router.put("/:id", updateNotes);

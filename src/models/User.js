@@ -1,11 +1,11 @@
-const mongoose = require('mongoose')
-const bcrypt = require('bcryptjs');
-const { func } = require('joi');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto'; 
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        requred: [true, 'Name is required'],
+        required: [true, 'Name is required'],
         trim: true,
         maxlength: [50, 'Name cannot exceed 50 characters']
     },
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        requred: [true, 'Password is required'],
+        required: [true, 'Password is required'],
         minlength: [8, 'Password must be at least 8 characters'],
     },
     resetPasswordToken: {
@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: undefined
     },
-
     refreshTokens: [{
         token: String,
         createdAt: {
@@ -42,7 +41,7 @@ const userSchema = new mongoose.Schema({
         }
     }],
     isActive: {
-        type: String,
+        type: Boolean,
         default: true
     },
     createdAt: {
@@ -65,38 +64,44 @@ userSchema.pre('save', async function (next) {
     }
 });
 
-//Compare entered password with hashed password
 userSchema.methods.matchPassword = async function (enterPassword) {
     return await bcrypt.compare(enterPassword, this.password);
 };
-//Generate password reset token
+
 userSchema.methods.getResetPasswordToken = function () {
-    const resetToken = require('crypto').randomBytes(20).toString('hex')
-    this.resetPasswordToken = require('crypto')
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    this.resetPasswordToken = crypto
         .createHash('sha256')
         .update(resetToken)
-        .digest('hex')
-    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+        .digest('hex');
+    
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000; 
     return resetToken;
 };
-//Add refresh token
+
 userSchema.methods.addRefreshToken = function (token) {
     this.refreshTokens.push({
         token,
         createdAt: new Date()
     });
 };
-//Remove refresh token
+
+// Remove refresh token
 userSchema.methods.removeRefreshToken = function (token) {
     this.refreshTokens = this.refreshTokens.filter(
         tokenObj => tokenObj.token !== token
     );
 };
-//Clean expired refresh tokens
+
+// Clean expired refresh tokens
 userSchema.methods.cleanExpiredTokens = function () {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     this.refreshTokens = this.refreshTokens.filter(
         tokenObj => tokenObj.createdAt > sevenDaysAgo
     );
 };
-module.exports = mongoose.model('User', userSchema);
+
+// CHANGED: Use 'export default' for a single export
+const User = mongoose.model('User', userSchema);
+export default User;

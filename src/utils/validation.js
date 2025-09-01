@@ -1,7 +1,5 @@
-const { errors } = require('@upstash/redis');
-const Joi = require('joi')
-
-const registerValidation = (data) => {
+import Joi from 'joi';
+export const registerValidation = (data) => {
     const schema = Joi.object({
         name: Joi.string()
             .min(2)
@@ -42,12 +40,9 @@ const registerValidation = (data) => {
             })
     })
     return schema.validate(data, { abortEarly: false })
-    /**Setting abortEarly: false tells Joi to check all validation rules
-     *  and return all errors at once. This is useful
-     *  for displaying all validation errors to the user simultaneously. */
 };
-const LoginValidation = (data) => {
-    //console.log(data)
+
+export const LoginValidation = (data) => {
     const schema = Joi.object({
         email: Joi.string()
             .email()
@@ -71,7 +66,8 @@ const LoginValidation = (data) => {
     });
     return schema.validate(data)
 }
-const forgotPasswordValidation = (data) => {
+
+export const forgotPasswordValidation = (data) => {
     const schema = Joi.object({
         email: Joi.string()
             .email()
@@ -85,7 +81,8 @@ const forgotPasswordValidation = (data) => {
     })
     return schema.validate(data);
 };
-const resetPasswordValidation = (data) => {
+
+export const resetPasswordValidation = (data) => {
     const schema = Joi.object({
         token: Joi.string()
             .required()
@@ -113,17 +110,11 @@ const resetPasswordValidation = (data) => {
     })
     return schema.validate(data, { abortEarly: false });
 }
-const formatValidationErrors = (errors) => {
+
+export const formatValidationErrors = (errors) => {
     return errors.details.map(error => ({
         field: error.path[0],
         message: error.message
     }));
 };
 
-module.exports = {
-    registerValidation,
-    LoginValidation,
-    forgotPasswordValidation,
-    resetPasswordValidation,
-    formatValidationErrors
-}

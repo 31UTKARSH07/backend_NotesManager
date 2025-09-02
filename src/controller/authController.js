@@ -39,7 +39,7 @@ export const registerUser = async (req, res) => {
             email,
             password
         });
-        await user.save()
+        await user.save() //.save is used to create a new record in the database. or update if the data is already present 
         const { accessToken, refreshToken } = generateTokenPair(user._id);
         user.addRefreshToken(refreshToken)
         await user.save();
@@ -91,7 +91,6 @@ export const loginUser = async (req, res) => {
                 message: 'Invalid email or password'
             });
         }
-
         const isPasswordCorrect = await user.matchPassword(password);
         if (!isPasswordCorrect) {
             return res.status(401).json({
@@ -99,7 +98,6 @@ export const loginUser = async (req, res) => {
                 message: 'Invalid email or password'
             });
         }
-
         const { accessToken, refreshToken } = generateTokenPair(user._id);
 
         user.cleanExpiredTokens();
@@ -142,7 +140,6 @@ export const loginUser = async (req, res) => {
 export const refreshToken = async (req, res) => {
     try {
         const { refreshToken } = req.cookies;
-
         if (!refreshToken) {
             return res.status(401).json({
                 success: false,
@@ -166,7 +163,7 @@ export const refreshToken = async (req, res) => {
             })
         }
         const tokenExists = user.refreshTokens.some(
-            tokenObj => tokenObj.token === refreshToken
+            tokenObj => tokenObj.token === refreshToken // this is the test function that .some method runs on refreshToken array in DB
         );
         if (!tokenExists) {
             return res.status(401).json({
@@ -261,7 +258,7 @@ export const forgotPassword = async (req, res) => {
             console.log('Email sending error:', emailError);
             user.resetPasswordToken = undefined;
             user.resetPasswordExpire = undefined;
-            await user.save();
+            await user.save();// so this save function save data or we say restore data in database
 
             return res.status(500).json({
                 success: false,

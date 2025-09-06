@@ -1,23 +1,46 @@
+import { text } from "express";
 import mongoose from "mongoose";
 // 1- create a schema
 // 2- model based off of that schema
 
 const notesSchema = new mongoose.Schema(
-{
-    title:{
-    type:String,
-    required: true,
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 200,
     },
     content: {
-    type:String,
-    required:true,
+      type: String,
+      required: true,
+      maxLength: 10000,
     },
-    tags:{
-        type:[String],
-        default:[],
+    tags: [
+      {
+        type: [String],
+        default: [],
+        trim: true,
+        maxLength: 50,
+      },
+    ],
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-},
-{timestamps:true}
-)
-const Note = mongoose.model("Note",notesSchema)
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { timestamps: true }
+);
+notesSchema.index({ userId: 1, createdAt: -1 }); // so this is indexing for better query performance
+notesSchema.index({ userId: 1, title: "text", content: "text" });
+const Note = mongoose.model("Note", notesSchema);
 export default Note;

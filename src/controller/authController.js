@@ -1,4 +1,3 @@
-
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { generateTokenPair, verifyRefreshToken } from '../utils/jwt.js';
@@ -10,7 +9,6 @@ import {
   formatValidationErrors
 } from '../utils/validation.js';
 import { sendPasswordResetEmail,  } from '../utils/email.js';
-
 
 export const registerUser = async (req, res) => {
     try {

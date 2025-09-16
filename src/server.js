@@ -7,6 +7,7 @@ import notesRoutes from "./routes/notesRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import { rateLimit } from "express-rate-limit";
 import { connectDB } from "./config/db.js"
+import userRouter from "./routes/userRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -80,6 +81,7 @@ app.use('/api/auth', authLimiter);
 //next();
 //})
 app.use("/api/auth",authRoutes)
+app.use("/api/user",userRouter)
 app.use("/api/notes", notesRoutes)
 // if(process.env.NODE_ENV === "production"){
 //    app.use(express.static(path.join(__dirname,"../frontend/dist")))

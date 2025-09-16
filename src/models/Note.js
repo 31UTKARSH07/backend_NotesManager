@@ -40,7 +40,5 @@ const notesSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-notesSchema.index({ userId: 1, createdAt: -1 }); // so this is indexing for better query performance
-notesSchema.index({ userId: 1, title: "text", content: "text" });
 const Note = mongoose.model("Note", notesSchema);
 export default Note;

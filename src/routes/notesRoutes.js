@@ -8,19 +8,18 @@ import {
     searchNotes,
     filterByTag
 } from "../controller/notesController.js"
-import {authenticateToken,authorizeNoteAccess} from '../middleware/auth.js'
 const router = express.Router();
 
-router.use(authenticateToken);
+
 
 router.get("/", getAllNotes);
 router.get("/search", searchNotes);
 router.get("/tag/:tag", filterByTag);
 router.post("/", createNotes);
 
-router.get("/:id",authorizeNoteAccess, getNoteById);
-router.put("/:id",authorizeNoteAccess, updateNotes);
-router.delete("/:id",authorizeNoteAccess, deleteNotes);
+router.get("/:id", getNoteById);
+router.put("/:id", updateNotes);
+router.delete("/:id", deleteNotes);
 
 export default router
 

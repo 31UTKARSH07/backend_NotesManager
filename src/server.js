@@ -38,9 +38,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 200
 }));
-app.options('*', cors());
+// app.options('*', cors());
 
-// }
 
 app.use(express.json());
 app.use(cookieParser());
@@ -75,11 +74,7 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/auth', authLimiter);
-//our simple custom middleware
-//app.use((req,res,next)=>{
-//console.log(`Req method is ${req.method} & Req URL is ${req.url}`);
-//next();
-//})
+
 app.use("/api/auth",authRoutes)
 app.use("/api/user",userRouter)
 app.use("/api/notes", notesRoutes)

@@ -10,8 +10,6 @@ import {
 } from "../controller/notesController.js"
 const router = express.Router();
 
-
-
 router.get("/", getAllNotes);
 router.get("/search", searchNotes);
 router.get("/tag/:tag", filterByTag);

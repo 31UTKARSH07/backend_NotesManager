@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../config/token.js";
@@ -20,7 +19,6 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     console.log("Salt:", salt);
-
     const user = await User.create({
       name,
       email,

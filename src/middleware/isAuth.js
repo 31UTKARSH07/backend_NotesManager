@@ -7,8 +7,8 @@ const isAuth = async(req , res , next) => {
     }
     try {
         const decoded = jwt.verify(token,process.env.JWT_SECRET);
-        req.userId = decoded.id;
-        console.log(decoded);
+        req.user = decoded;
+        console.log('Decoded user from token:', req.user);
         next();
     } catch (error) {
         return res.status(401).json({message:"Not Authorised"});

@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js"
 import { rateLimit } from "express-rate-limit";
 import { connectDB } from "./config/db.js"
 import userRouter from "./routes/userRoutes.js";
+import isAuth from "./middleware/isAuth.js";
 dotenv.config();
 
 const app = express();
@@ -73,6 +74,12 @@ const authLimiter = rateLimit({
   }
 });
 
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log("Server started on PORT:", PORT)
+  })
+})
+
 app.use('/api/auth', authLimiter);
 
 app.use("/api/auth",authRoutes)
@@ -84,11 +91,7 @@ app.use("/api/notes", notesRoutes)
 //    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"))
 // })
 // }
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("Server started on PORT:", PORT)
-  })
-})
+
 //app.get("/api/notes", (req,res)=>{
 //res.status(200).send("you got 10 notes")
 //});

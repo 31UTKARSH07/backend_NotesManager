@@ -19,18 +19,21 @@ export async function getAllNotes(req, res) {
 // Create a new note
 export async function createNotes(req, res) {
   try {
-    const { title, content, tags } = req.body;
 
+    const { title, content, tags } = req.body;
+    console.log("title: " + title + " content: " + content + " tags: " + tags);
     // Simple validation
     if (!title || !content) {
       return res.status(400).json({ message: "Title and content are required" });
     }
-
     const note = new Note({
       title: title,
       content: content,
-      tags: tags || [] // Use tags from request, or empty array if not provided
+      tags: tags || [], // Use tags from request, or empty array if not provided
+      userId: "68d2e9cab685d362b69fce2f"
     });
+    console.log("Creating note:", note);
+    
 
     const savedNote = await note.save();
     console.log("Note created successfully:", savedNote._id);

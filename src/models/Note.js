@@ -37,6 +37,21 @@ const notesSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    isTrashed: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+    },
+    sharedId: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

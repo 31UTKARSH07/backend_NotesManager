@@ -8,7 +8,6 @@ const isAuth = async (req, res, next) => {
     return res.status(401).json({ message: "Not Authorised" });
   }
   try {
-    
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       if (err) {
         return res.status(401).json({ message: "Not Authorised" });

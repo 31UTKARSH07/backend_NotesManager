@@ -3,11 +3,11 @@ import Note from "../models/Note.js";
 // Get all notes
 export async function getAllNotes(req, res) {
   try {
-    console.log(req.user)
-    const notes = await Note.find({userId:req.user.id}).sort({
+    console.log(req.user);
+    const notes = await Note.find({ userId: req.user.id }).sort({
       createdAt: -1,
     });
-    
+
     console.log("Found notes:", notes.length);
     res.status(200).json(notes);
   } catch (error) {
@@ -23,16 +23,17 @@ export async function createNotes(req, res) {
     console.log("title: " + title + " content: " + content + " tags: " + tags);
     // Simple validation
     if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+      return res
+        .status(400)
+        .json({ message: "Title and content are required" });
     }
     const note = new Note({
       title: title,
       content: content,
       tags: tags || [], // Use tags from request, or empty array if not provided
-      userId: req.user.id
+      userId: req.user.id,
     });
     console.log("Creating note:", note);
-    
 
     const savedNote = await note.save();
     console.log("Note created successfully:", savedNote._id);
@@ -79,7 +80,7 @@ export async function deleteNotes(req, res) {
     const noteId = req.params.id;
 
     const deletedNote = await Note.findByIdAndDelete(noteId);
-    
+
     if (!deletedNote) {
       return res.status(404).json({ message: "Note not found" });
     }
@@ -98,7 +99,7 @@ export async function getNoteById(req, res) {
     const noteId = req.params.id;
 
     const note = await Note.findById(noteId);
-    
+
     if (!note) {
       return res.status(404).json({ message: "Note not found" });
     }
@@ -134,12 +135,43 @@ export async function searchNotes(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+export async function toggleArchive(req, res) {
+  try {
+    const notesId = req.params.id;
+    const userId = req.user._id;
+
+    const note = await Note.findOne({ _id: notesId, user: userId });
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    note.isArchived = !note.isArchived;
+    await note.save();
+    return res.json({ success: true, note });
+  } catch (error) {
+    console.log("Archived error", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
+export async function getArchivedNotes(req, res) {
+  try {
+    const userId = req.params._id;
+    const archivedNotes = await Note.find({
+      user: userId,
+      isArchived: true,
+      isTrashed: { $ne: true },
+    }).sort({ updatedAt: -1 });
+    return res.json(archivedNotes);
+  } catch (error) {
+    console.error("Fetch archived notes error", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
 
 // Filter notes by tag (optional - you can remove if not needed)
 export async function filterByTag(req, res) {
   try {
     const { tag } = req.params;
-
     const notes = await Note.find({
       tags: { $in: [new RegExp(tag, "i")] },
     }).sort({ createdAt: -1 });

@@ -1,25 +1,29 @@
-import express from "express"
+import express from "express";
 import {
-    createNotes,
-    getAllNotes,
-    updateNotes,
-    deleteNotes,
-    getNoteById,
-    searchNotes,
-    filterByTag
-} from "../controller/notesController.js"
+  createNotes,
+  getAllNotes,
+  updateNotes,
+  deleteNotes,
+  getNoteById,
+  searchNotes,
+  filterByTag,
+  toggleArchive,
+  getArchivedNotes,
+} from "../controller/notesController.js";
 const router = express.Router();
 
 router.get("/", getAllNotes);
 router.get("/search", searchNotes);
 router.get("/tag/:tag", filterByTag);
 router.post("/", createNotes);
+router.put("/:id/archive", toggleArchive);
+router.get("/archived", getArchivedNotes);
 
 router.get("/:id", getNoteById);
 router.put("/:id", updateNotes);
 router.delete("/:id", deleteNotes);
 
-export default router
+export default router;
 
 //app.get("/api/notes", (req,res)=>{
 //res.status(200).send("you got 10 notes")

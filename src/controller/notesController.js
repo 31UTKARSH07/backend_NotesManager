@@ -4,7 +4,7 @@ import Note from "../models/Note.js";
 export async function getAllNotes(req, res) {
   try {
     console.log(req.user)
-    const notes = await Note.find({}).sort({
+    const notes = await Note.find({userId:req.user.id}).sort({
       createdAt: -1,
     });
     
@@ -19,7 +19,6 @@ export async function getAllNotes(req, res) {
 // Create a new note
 export async function createNotes(req, res) {
   try {
-
     const { title, content, tags } = req.body;
     console.log("title: " + title + " content: " + content + " tags: " + tags);
     // Simple validation
@@ -30,7 +29,7 @@ export async function createNotes(req, res) {
       title: title,
       content: content,
       tags: tags || [], // Use tags from request, or empty array if not provided
-      userId: "68d2e9cab685d362b69fce2f"
+      userId: req.user.id
     });
     console.log("Creating note:", note);
     

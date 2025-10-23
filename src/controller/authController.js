@@ -18,7 +18,7 @@ export const registerUser = async (req, res) => {
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    console.log("Salt:", salt);
+    //console.log("Salt:", salt);
     const user = await User.create({
       name,
       email,
@@ -28,10 +28,11 @@ export const registerUser = async (req, res) => {
     const token = await generateToken(user._id);
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      secure: true
     });
-    console.log("Token:", token);
+    //console.log("Token:", token);
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -71,8 +72,15 @@ export const loginUser = async (req, res) => {
         .json({ success: false, message: "Invalid email or password" });
     }
     const token = await generateToken(user._id);
-    console.log("token: ",token);
-    res.status(200).json({
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      maxAge: 60 * 60 * 1000,
+    });
+    console.log(res.cookie.token)
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       user: {

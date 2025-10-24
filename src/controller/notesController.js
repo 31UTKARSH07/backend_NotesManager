@@ -1,39 +1,84 @@
 import Note from "../models/Note.js";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get all notes
 export async function getAllNotes(req, res) {
   try {
-    console.log(req.user);
-    const notes = await Note.find({ userId: req.user.id }).sort({
-      createdAt: -1,
-    });
-
-    console.log("Found notes:", notes.length);
+    const notes = await Note.find({
+      userId: req.user.id,
+      isArchived: false,
+      isTrashed: false,
+    }).sort({ createdAt: -1 });
+    console.log("Found active notes:", notes.length);
     res.status(200).json(notes);
   } catch (error) {
-    console.log("Error in getAllNotes controller:", error);
+    console.error("Error in getAllNotes controller:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
 
-// Create a new note
+export async function shareNote(req, res) {
+  try {
+    const note = await Note.findOne({ 
+      _id: req.params.id, 
+      userId: req.user.id 
+    });
+    
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    
+    if (!note.sharedId) {
+      note.sharedId = uuidv4();
+      await note.save();
+    }
+    
+    return res.json({ sharedId: note.sharedId });
+  } catch (error) {
+    console.error("Error in shareNote:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function getSharedNote(req, res) {
+  try {
+    const { sharedId } = req.params;
+    const note = await Note.findOne({ sharedId: sharedId });
+    
+    if (!note || note.isTrashed) {
+      return res.status(404).json({ 
+        message: "Note not found or is no longer shared" 
+      });
+    }
+    
+    res.status(200).json({
+      title: note.title,
+      content: note.content,
+      tags: note.tags,
+      updatedAt: note.updatedAt,
+    });
+  } catch (error) {
+    console.error("Error in getSharedNote:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export async function createNotes(req, res) {
   try {
     const { title, content, tags } = req.body;
-    console.log("title: " + title + " content: " + content + " tags: " + tags);
-    // Simple validation
+    
     if (!title || !content) {
-      return res
-        .status(400)
-        .json({ message: "Title and content are required" });
+      return res.status(400).json({ 
+        message: "Title and content are required" 
+      });
     }
+    
     const note = new Note({
-      title: title,
-      content: content,
-      tags: tags || [], // Use tags from request, or empty array if not provided
+      title,
+      content,
+      tags: tags || [],
       userId: req.user.id,
     });
-    console.log("Creating note:", note);
 
     const savedNote = await note.save();
     console.log("Note created successfully:", savedNote._id);
@@ -44,26 +89,27 @@ export async function createNotes(req, res) {
   }
 }
 
-// Update an existing note
 export async function updateNotes(req, res) {
   try {
     const { title, content, tags } = req.body;
     const noteId = req.params.id;
 
-    // Find and update the note
-    const updatedNote = await Note.findByIdAndUpdate(
-      noteId,
+    // FIX: Verify ownership before updating
+    const updatedNote = await Note.findOneAndUpdate(
+      { _id: noteId, userId: req.user.id }, // Added userId check
       {
-        title: title,
-        content: content,
-        tags: tags,
+        title,
+        content,
+        tags,
         updatedAt: new Date(),
       },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!updatedNote) {
-      return res.status(404).json({ message: "Note not found" });
+      return res.status(404).json({ 
+        message: "Note not found or you don't have permission" 
+      });
     }
 
     console.log("Note updated successfully:", updatedNote._id);
@@ -74,15 +120,20 @@ export async function updateNotes(req, res) {
   }
 }
 
-// Delete a note
 export async function deleteNotes(req, res) {
   try {
     const noteId = req.params.id;
 
-    const deletedNote = await Note.findByIdAndDelete(noteId);
+    // FIX: Verify ownership before deleting
+    const deletedNote = await Note.findOneAndDelete({
+      _id: noteId,
+      userId: req.user.id, // Added userId check
+    });
 
     if (!deletedNote) {
-      return res.status(404).json({ message: "Note not found" });
+      return res.status(404).json({ 
+        message: "Note not found or you don't have permission" 
+      });
     }
 
     console.log("Note deleted successfully:", deletedNote._id);
@@ -93,17 +144,22 @@ export async function deleteNotes(req, res) {
   }
 }
 
-// Get a single note by ID
 export async function getNoteById(req, res) {
   try {
     const noteId = req.params.id;
-
-    const note = await Note.findById(noteId);
-
+    
+    // FIX: Verify ownership before returning
+    const note = await Note.findOne({
+      _id: noteId,
+      userId: req.user.id, // Added userId check
+    });
+    
     if (!note) {
-      return res.status(404).json({ message: "Note not found" });
+      return res.status(404).json({ 
+        message: "Note not found or you don't have permission" 
+      });
     }
-
+    
     console.log("Note found:", note._id);
     res.status(200).json(note);
   } catch (error) {
@@ -112,16 +168,19 @@ export async function getNoteById(req, res) {
   }
 }
 
-// Search notes (optional - you can remove if not needed)
 export async function searchNotes(req, res) {
   try {
     const searchTerm = req.query.query;
-
+    
     if (!searchTerm || searchTerm.trim() === "") {
       return res.status(400).json({ message: "Search term is required" });
     }
-
+    
+    // FIX: Added userId filter to search only user's notes
     const notes = await Note.find({
+      userId: req.user.id, // Added this!
+      isArchived: false,
+      isTrashed: false,
       $or: [
         { title: { $regex: searchTerm, $options: "i" } },
         { content: { $regex: searchTerm, $options: "i" } },
@@ -135,17 +194,21 @@ export async function searchNotes(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+
 export async function toggleArchive(req, res) {
   try {
     const notesId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
-    const note = await Note.findOne({ _id: notesId, user: userId });
+    const note = await Note.findOne({ _id: notesId, userId: userId });
+    
     if (!note) {
       return res.status(404).json({ message: "Note not found" });
     }
+    
     note.isArchived = !note.isArchived;
     await note.save();
+    
     return res.json({ success: true, note });
   } catch (error) {
     console.log("Archived error", error);
@@ -153,26 +216,51 @@ export async function toggleArchive(req, res) {
   }
 }
 
-export async function getArchivedNotes(req, res) {
+export async function moveToTrash(req, res) {
   try {
-    const userId = req.params._id;
-    const archivedNotes = await Note.find({
-      user: userId,
-      isArchived: true,
-      isTrashed: { $ne: true },
-    }).sort({ updatedAt: -1 });
-    return res.json(archivedNotes);
+    const note = await Note.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    note.isTrashed = true;
+    await note.save();
+
+    res.json({ success: true, message: "Note moved to Trash" });
   } catch (error) {
-    console.error("Fetch archived notes error", err);
-    return res.status(500).json({ message: "Server error" });
+    console.error("Error in moveToTrash:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
-// Filter notes by tag (optional - you can remove if not needed)
+export async function getArchivedNotes(req, res) {
+  try {
+    const archivedNotes = await Note.find({
+      userId: req.user.id,
+      isArchived: true,
+      isTrashed: false,
+    }).sort({ updatedAt: -1 });
+    
+    res.status(200).json(archivedNotes);
+  } catch (error) {
+    console.error("Error fetching archived notes:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export async function filterByTag(req, res) {
   try {
     const { tag } = req.params;
+    
+    // FIX: Added userId filter to search only user's notes
     const notes = await Note.find({
+      userId: req.user.id, // Added this!
+      isArchived: false,
+      isTrashed: false,
       tags: { $in: [new RegExp(tag, "i")] },
     }).sort({ createdAt: -1 });
 
@@ -181,5 +269,65 @@ export async function filterByTag(req, res) {
   } catch (error) {
     console.log("Error in filterByTag controller:", error);
     res.status(500).json({ message: "Server error" });
+  }
+}
+
+export async function restoreNote(req, res) {
+  try {
+    const note = await Note.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    note.isTrashed = false;
+    await note.save();
+
+    res.json({ 
+      success: true, 
+      message: "Note restored successfully", 
+      note 
+    });
+  } catch (error) {
+    console.error("Error in restoreNote:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function deletePermanently(req, res) {
+  try {
+    const note = await Note.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+      isTrashed: true,
+    });
+
+    if (!note) {
+      return res.status(404).json({ 
+        message: "Note not found or not in Trash" 
+      });
+    }
+
+    res.json({ success: true, message: "Note permanently deleted" });
+  } catch (error) {
+    console.error("Error in deletePermanently:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getTrashedNotes(req, res) {
+  try {
+    const trashedNotes = await Note.find({
+      userId: req.user.id,
+      isTrashed: true,
+    }).sort({ updatedAt: -1 });
+
+    res.status(200).json(trashedNotes);
+  } catch (error) {
+    console.error("Error fetching trashed notes:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }

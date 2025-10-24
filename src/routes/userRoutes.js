@@ -1,7 +1,22 @@
 import express from "express";
-import getCurrentUser from "../controller/userController.js";
+import {
+  getCurrentUser,
+  updateProfilePicture,
+} from "../controller/userController.js";
 import isAuth from "../middleware/isAuth.js";
+import upload from "../middleware/upload.js";
 
 const userRouter = express.Router();
-userRouter.get('/current',isAuth,getCurrentUser);
+
+// 1. Fixed the path from "/current" to "/profile"
+userRouter.get("/profile", isAuth, getCurrentUser);
+
+// 2. Fixed this route to use "userRouter" instead of the notes router
+userRouter.put(
+  "/profile/picture",
+  isAuth,
+  upload.single("avatar"),
+  updateProfilePicture
+);
+
 export default userRouter;

@@ -77,7 +77,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
-      maxAge: 60 * 60 * 1000,
+      maxAge: 30*24*60 * 60 * 1000,
     });
     console.log(res.cookie.token)
     return res.status(200).json({
@@ -97,26 +97,14 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
-    const { refreshToken } = req.cookies;
-
-    if (refreshToken) {
-      const { valid, decoded } = verifyRefreshToken(refreshToken);
-
-      if (valid && decoded) {
-        const user = await User.findById(decoded.userId);
-        if (user) {
-          user.removeRefreshToken(refreshToken);
-          await user.save();
-        }
-      }
-    }
-    // Clear cookie with same options used when setting it
-    res.clearCookie("refreshToken", {
+    // Clear the correct cookie name
+    res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
     });
+    
     res.status(200).json({
       success: true,
       message: "Logout Successful",

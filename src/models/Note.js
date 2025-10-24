@@ -52,6 +52,7 @@ const notesSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    
   },
   { timestamps: true }
 );

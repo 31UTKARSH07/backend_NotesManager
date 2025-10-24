@@ -9,15 +9,28 @@ import {
   filterByTag,
   toggleArchive,
   getArchivedNotes,
+  getTrashedNotes,
+  moveToTrash,
+  restoreNote,
+  deletePermanently,
+  shareNote,
+  getSharedNote,
 } from "../controller/notesController.js";
+import isAuth from "../middleware/isAuth.js";
 const router = express.Router();
 
-router.get("/", getAllNotes);
-router.get("/search", searchNotes);
-router.get("/tag/:tag", filterByTag);
-router.post("/", createNotes);
-router.put("/:id/archive", toggleArchive);
-router.get("/archived", getArchivedNotes);
+router.get("/public/:sharedId", getSharedNote);
+router.get("/",isAuth, getAllNotes);
+router.get("/search",isAuth, searchNotes);
+router.get("/tag/:tag",isAuth, filterByTag);
+router.post("/",isAuth, createNotes);
+router.put("/:id/archive",isAuth, toggleArchive);
+router.get("/archived",isAuth, getArchivedNotes);
+router.get("/trashed",isAuth,getTrashedNotes);
+router.put("/:id/trash",isAuth,moveToTrash);
+router.put("/:id/restore",isAuth,restoreNote);
+router.post("/:id/share",isAuth,shareNote);
+router.delete("/:id/permanent",isAuth,deletePermanently);
 
 router.get("/:id", getNoteById);
 router.put("/:id", updateNotes);

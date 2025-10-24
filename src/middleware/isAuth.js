@@ -3,7 +3,9 @@ import User from "../models/User.js";
 
 const isAuth = async (req, res, next) => {
   const token = req.cookies.token;
-  console.log(token)
+  console.log("🔍 Auth Debug:");
+  console.log("- Cookies received:", req.cookies);
+  console.log("- Token:", token ? "✅ Present" : "❌ Missing");
   if (!token) {
     return res.status(401).json({ message: "Not Authorised" });
   }

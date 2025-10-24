@@ -38,7 +38,7 @@ A robust Node.js/Express backend for the ThinkBoard note-taking application, fea
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone [(https://github.com/31UTKARSH07/backend_NotesManager.git)]
 cd backend
 ```
 

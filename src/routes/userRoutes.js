@@ -8,7 +8,6 @@ import upload from "../middleware/upload.js";
 
 const userRouter = express.Router();
 
-// 1. Fixed the path from "/current" to "/profile"
 userRouter.get("/profile", isAuth, getCurrentUser);
 
 // 2. Fixed this route to use "userRouter" instead of the notes router

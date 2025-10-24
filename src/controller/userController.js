@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Note from "../models/Note.js";
-import cloudinary from "cloudinary";
+import { uploadProfileImageCloudinary } from "../config/cloudinary.js";
+
 
 const getCurrentUser = async (req, res) => {
   const userId = req.user.id || req.user._id;
@@ -33,14 +34,10 @@ const updateProfilePicture = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded." });
     }
 
-    const result = await cloudinary.v2.uploader.upload(req.file.path, {
-      folder: "thinkboard_avatars",
-      width: 150,
-      crop: "fill",
-    });
+    const secure_url = await uploadProfileImageCloudinary(req.file)
 
     const user = await User.findById(userId);
-    user.avatarUrl = result.secure_url;
+    user.avatarUrl = secure_url;
     await user.save();
 
     res.status(200).json({
